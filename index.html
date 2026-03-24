@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TabLX — Research Session Manager</title>
+  <title>TabLX — Support</title>
   <meta name="description" content="Save named tab sessions. Restore with one click. Never lose your workspace again." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -14,20 +14,16 @@
       --surface:     #161c25;
       --surface-2:   #1c2333;
       --surface-3:   #212d3d;
-      --surface-4:   #263347;
       --border:      #253044;
       --border-soft: #1e2a3b;
       --cyan:        #38e8ff;
       --cyan-dim:    #1a9db3;
       --cyan-glow:   rgba(56,232,255,0.10);
-      --cyan-glow2:  rgba(56,232,255,0.06);
       --cyan-glow3:  rgba(56,232,255,0.04);
       --violet:      #a78bfa;
       --violet-dim:  rgba(167,139,250,0.15);
       --green:       #34d399;
       --green-dim:   rgba(52,211,153,0.10);
-      --amber:       #fbbf24;
-      --red:         #f87171;
       --text:        #e2eaf5;
       --text-2:      #8ba0be;
       --text-3:      #4a6080;
@@ -38,10 +34,8 @@
       --radius-lg:   14px;
       --max-w:       860px;
     }
-
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
-
     body {
       font-family: var(--font-body);
       background: var(--bg);
@@ -51,677 +45,167 @@
       -webkit-font-smoothing: antialiased;
       overflow-x: hidden;
     }
-
-    /* ── Noise texture overlay ── */
     body::before {
       content: '';
-      position: fixed;
-      inset: 0;
+      position: fixed; inset: 0;
       background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 0;
-      opacity: 0.4;
+      pointer-events: none; z-index: 0; opacity: 0.4;
     }
+    .glow-blob { position: fixed; border-radius: 50%; filter: blur(120px); pointer-events: none; z-index: 0; }
+    .glow-blob-1 { width: 500px; height: 500px; background: rgba(56,232,255,0.04); top: -100px; right: -100px; }
+    .glow-blob-2 { width: 400px; height: 400px; background: rgba(167,139,250,0.04); bottom: 100px; left: -150px; }
 
-    /* ── Ambient glow blob ── */
-    .glow-blob {
-      position: fixed;
-      border-radius: 50%;
-      filter: blur(120px);
-      pointer-events: none;
-      z-index: 0;
-    }
-    .glow-blob-1 {
-      width: 500px; height: 500px;
-      background: rgba(56,232,255,0.04);
-      top: -100px; right: -100px;
-    }
-    .glow-blob-2 {
-      width: 400px; height: 400px;
-      background: rgba(167,139,250,0.04);
-      bottom: 100px; left: -150px;
-    }
-
-    /* ── Nav ── */
     nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
+      position: sticky; top: 0; z-index: 100;
       background: rgba(13,17,23,0.85);
       backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--border-soft);
     }
-
     .nav-inner {
-      max-width: var(--max-w);
-      margin: 0 auto;
-      padding: 0 24px;
-      height: 58px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      max-width: var(--max-w); margin: 0 auto; padding: 0 24px;
+      height: 58px; display: flex; align-items: center; justify-content: space-between;
     }
-
-    .nav-brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      text-decoration: none;
-    }
-
+    .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
     .nav-logo {
-      width: 28px;
-      height: 28px;
-      background: var(--cyan-glow);
-      border: 1px solid rgba(56,232,255,0.2);
-      border-radius: 7px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      filter: drop-shadow(0 0 6px rgba(56,232,255,0.25));
+      width: 28px; height: 28px; background: var(--cyan-glow);
+      border: 1px solid rgba(56,232,255,0.2); border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      filter: drop-shadow(0 0 6px rgba(56,232,255,0.25)); color: var(--cyan);
     }
-
-    .nav-logo svg { width: 16px; height: 16px; }
-
-    .nav-name {
-      font-family: var(--font-brand);
-      font-weight: 700;
-      font-size: 16px;
-      color: var(--text);
-      letter-spacing: 0.02em;
-    }
-
-    .nav-links {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
+    .nav-name { font-family: var(--font-brand); font-weight: 700; font-size: 16px; color: var(--text); letter-spacing: 0.02em; }
+    .nav-links { display: flex; align-items: center; gap: 4px; }
     .nav-link {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      font-weight: 500;
-      letter-spacing: 0.06em;
-      color: var(--text-3);
-      text-decoration: none;
-      padding: 6px 12px;
-      border-radius: 6px;
-      transition: color 0.15s, background 0.15s;
+      font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+      letter-spacing: 0.06em; color: var(--text-3); text-decoration: none;
+      padding: 6px 12px; border-radius: 6px; transition: color 0.15s, background 0.15s;
     }
-
     .nav-link:hover { color: var(--text); background: var(--surface-2); }
     .nav-link.active { color: var(--cyan); background: var(--cyan-glow); }
 
-    /* ── Page sections ── */
-    .page { display: none; position: relative; z-index: 1; }
-    .page.visible { display: block; }
+    .container { max-width: var(--max-w); margin: 0 auto; padding: 0 24px; }
 
-    /* ── Container ── */
-    .container {
-      max-width: var(--max-w);
-      margin: 0 auto;
-      padding: 0 24px;
-    }
-
-    /* ══════════════════════════════════════
-       SUPPORT PAGE
-    ══════════════════════════════════════ */
-
-    /* Hero */
-    .hero {
-      padding: 80px 0 64px;
-      text-align: center;
-      position: relative;
-    }
-
+    .hero { padding: 80px 0 64px; text-align: center; position: relative; z-index: 1; }
     .hero-eyebrow {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      font-weight: 500;
-      letter-spacing: 0.14em;
-      color: var(--cyan);
-      text-transform: uppercase;
-      margin-bottom: 18px;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
+      font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+      letter-spacing: 0.14em; color: var(--cyan); text-transform: uppercase;
+      margin-bottom: 18px; display: inline-flex; align-items: center; gap: 8px;
     }
-
-    .hero-eyebrow::before,
-    .hero-eyebrow::after {
-      content: '';
-      width: 24px;
-      height: 1px;
-      background: var(--cyan-dim);
-    }
-
+    .hero-eyebrow::before, .hero-eyebrow::after { content: ''; width: 24px; height: 1px; background: var(--cyan-dim); }
     .hero-title {
-      font-family: var(--font-brand);
-      font-size: clamp(36px, 6vw, 56px);
-      font-weight: 800;
-      line-height: 1.1;
-      letter-spacing: -0.02em;
-      margin-bottom: 18px;
+      font-family: var(--font-brand); font-size: clamp(36px, 6vw, 56px);
+      font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 18px;
     }
-
     .hero-title .accent { color: var(--cyan); }
-
-    .hero-sub {
-      color: var(--text-2);
-      font-size: 16px;
-      max-width: 520px;
-      margin: 0 auto 36px;
-      line-height: 1.7;
-    }
-
-    .hero-badges {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
+    .hero-sub { color: var(--text-2); font-size: 16px; max-width: 520px; margin: 0 auto 36px; line-height: 1.7; }
+    .hero-badges { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
     .badge {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      letter-spacing: 0.06em;
-      padding: 5px 12px;
-      border-radius: 20px;
-      border: 1px solid var(--border);
-      color: var(--text-2);
-      background: var(--surface);
+      font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em;
+      padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border);
+      color: var(--text-2); background: var(--surface);
     }
-
-    .badge.cyan { color: var(--cyan); border-color: rgba(56,232,255,0.2); background: var(--cyan-glow); }
+    .badge.cyan   { color: var(--cyan);   border-color: rgba(56,232,255,0.2);  background: var(--cyan-glow); }
     .badge.violet { color: var(--violet); border-color: rgba(167,139,250,0.2); background: var(--violet-dim); }
-    .badge.green { color: var(--green); border-color: rgba(52,211,153,0.2); background: var(--green-dim); }
+    .badge.green  { color: var(--green);  border-color: rgba(52,211,153,0.2);  background: var(--green-dim); }
 
-    /* Feature grid */
-    .section {
-      padding: 56px 0;
-      border-top: 1px solid var(--border-soft);
-    }
+    .section { padding: 56px 0; border-top: 1px solid var(--border-soft); position: relative; z-index: 1; }
+    .section-label { font-family: var(--font-mono); font-size: 10px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-3); margin-bottom: 6px; }
+    .section-title { font-family: var(--font-brand); font-size: 26px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 32px; }
 
-    .section-label {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      font-weight: 500;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: var(--text-3);
-      margin-bottom: 6px;
-    }
-
-    .section-title {
-      font-family: var(--font-brand);
-      font-size: 26px;
-      font-weight: 700;
-      letter-spacing: -0.01em;
-      margin-bottom: 32px;
-    }
-
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 16px;
-    }
-
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
     .feature-card {
-      background: var(--surface);
-      border: 1px solid var(--border-soft);
-      border-radius: var(--radius-lg);
-      padding: 22px;
-      transition: border-color 0.2s, background 0.2s;
-      position: relative;
-      overflow: hidden;
+      background: var(--surface); border: 1px solid var(--border-soft);
+      border-radius: var(--radius-lg); padding: 22px;
+      transition: border-color 0.2s, background 0.2s; position: relative; overflow: hidden;
     }
-
     .feature-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 1px;
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
       background: linear-gradient(90deg, transparent, var(--cyan-dim), transparent);
-      opacity: 0;
-      transition: opacity 0.2s;
+      opacity: 0; transition: opacity 0.2s;
     }
-
     .feature-card:hover { border-color: var(--border); background: var(--surface-2); }
     .feature-card:hover::before { opacity: 0.5; }
-
     .feature-icon {
-      width: 36px; height: 36px;
-      background: var(--cyan-glow);
-      border: 1px solid rgba(56,232,255,0.15);
-      border-radius: 9px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 14px;
-      color: var(--cyan);
+      width: 36px; height: 36px; background: var(--cyan-glow);
+      border: 1px solid rgba(56,232,255,0.15); border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 14px; color: var(--cyan);
     }
+    .feature-name { font-family: var(--font-brand); font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+    .feature-desc { font-size: 13px; color: var(--text-2); line-height: 1.6; }
 
-    .feature-icon svg { width: 18px; height: 18px; }
-
-    .feature-name {
-      font-family: var(--font-brand);
-      font-size: 14px;
-      font-weight: 600;
-      margin-bottom: 6px;
-    }
-
-    .feature-desc {
-      font-size: 13px;
-      color: var(--text-2);
-      line-height: 1.6;
-    }
-
-    /* FAQ */
     .faq-list { display: flex; flex-direction: column; gap: 2px; }
-
-    .faq-item {
-      background: var(--surface);
-      border: 1px solid var(--border-soft);
-      border-radius: var(--radius);
-      overflow: hidden;
-    }
-
+    .faq-item { background: var(--surface); border: 1px solid var(--border-soft); border-radius: var(--radius); overflow: hidden; }
     .faq-q {
-      width: 100%;
-      background: none;
-      border: none;
-      padding: 16px 20px;
-      text-align: left;
-      font-family: var(--font-body);
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text);
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      transition: background 0.15s;
+      width: 100%; background: none; border: none; padding: 16px 20px;
+      text-align: left; font-family: var(--font-body); font-size: 14px; font-weight: 600;
+      color: var(--text); cursor: pointer; display: flex; justify-content: space-between;
+      align-items: center; gap: 12px; transition: background 0.15s;
     }
-
     .faq-q:hover { background: var(--surface-2); }
-
-    .faq-chevron {
-      flex-shrink: 0;
-      color: var(--text-3);
-      transition: transform 0.2s;
-    }
-
+    .faq-chevron { flex-shrink: 0; color: var(--text-3); transition: transform 0.2s; }
     .faq-item.open .faq-chevron { transform: rotate(180deg); color: var(--cyan); }
-
-    .faq-a {
-      display: none;
-      padding: 0 20px 16px;
-      font-size: 13px;
-      color: var(--text-2);
-      line-height: 1.7;
-      border-top: 1px solid var(--border-soft);
-      padding-top: 14px;
-    }
-
+    .faq-a { display: none; padding: 14px 20px 16px; font-size: 13px; color: var(--text-2); line-height: 1.7; border-top: 1px solid var(--border-soft); }
     .faq-item.open .faq-a { display: block; }
 
-    /* Contact card */
     .contact-card {
-      background: var(--surface);
-      border: 1px solid var(--border-soft);
-      border-radius: var(--radius-lg);
-      padding: 36px;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
+      background: var(--surface); border: 1px solid var(--border-soft);
+      border-radius: var(--radius-lg); padding: 36px; text-align: center;
+      position: relative; overflow: hidden;
     }
-
     .contact-card::after {
-      content: '';
-      position: absolute;
-      inset: 0;
+      content: ''; position: absolute; inset: 0;
       background: radial-gradient(ellipse at 50% 0%, var(--cyan-glow3), transparent 70%);
       pointer-events: none;
     }
-
     .contact-icon {
-      width: 52px; height: 52px;
-      background: var(--cyan-glow);
-      border: 1px solid rgba(56,232,255,0.2);
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 18px;
-      color: var(--cyan);
+      width: 52px; height: 52px; background: var(--cyan-glow);
+      border: 1px solid rgba(56,232,255,0.2); border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 18px; color: var(--cyan);
       filter: drop-shadow(0 0 8px rgba(56,232,255,0.2));
     }
-
-    .contact-icon svg { width: 24px; height: 24px; }
-
-    .contact-title {
-      font-family: var(--font-brand);
-      font-size: 22px;
-      font-weight: 700;
-      margin-bottom: 10px;
-    }
-
-    .contact-body {
-      color: var(--text-2);
-      font-size: 14px;
-      max-width: 400px;
-      margin: 0 auto 24px;
-    }
-
+    .contact-title { font-family: var(--font-brand); font-size: 22px; font-weight: 700; margin-bottom: 10px; }
+    .contact-body { color: var(--text-2); font-size: 14px; max-width: 400px; margin: 0 auto 24px; }
     .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 22px;
-      border-radius: 8px;
-      font-family: var(--font-mono);
-      font-size: 12px;
-      font-weight: 500;
-      letter-spacing: 0.06em;
-      text-decoration: none;
-      transition: all 0.15s;
-      cursor: pointer;
-      border: none;
+      display: inline-flex; align-items: center; gap: 8px; padding: 10px 22px;
+      border-radius: 8px; font-family: var(--font-mono); font-size: 12px; font-weight: 500;
+      letter-spacing: 0.06em; text-decoration: none; transition: all 0.15s; cursor: pointer; border: none;
     }
+    .btn-primary { background: var(--cyan); color: #0d1117; }
+    .btn-primary:hover { background: #5eeeff; box-shadow: 0 0 20px rgba(56,232,255,0.3); }
 
-    .btn-primary {
-      background: var(--cyan);
-      color: #0d1117;
-    }
-
-    .btn-primary:hover {
-      background: #5eeeff;
-      box-shadow: 0 0 20px rgba(56,232,255,0.3);
-    }
-
-    .btn-ghost {
-      background: var(--surface-2);
-      color: var(--text-2);
-      border: 1px solid var(--border);
-    }
-
-    .btn-ghost:hover { background: var(--surface-3); color: var(--text); }
-
-    /* ══════════════════════════════════════
-       PRIVACY PAGE
-    ══════════════════════════════════════ */
-
-    .privacy-hero {
-      padding: 64px 0 48px;
-      border-bottom: 1px solid var(--border-soft);
-    }
-
-    .privacy-hero .hero-eyebrow { margin-bottom: 14px; }
-
-    .privacy-hero-title {
-      font-family: var(--font-brand);
-      font-size: clamp(28px, 5vw, 42px);
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      margin-bottom: 12px;
-    }
-
-    .privacy-meta {
-      font-family: var(--font-mono);
-      font-size: 12px;
-      color: var(--text-3);
-      letter-spacing: 0.04em;
-    }
-
-    .privacy-body {
-      padding: 48px 0 80px;
-      display: flex;
-      gap: 48px;
-      align-items: flex-start;
-    }
-
-    /* Sticky ToC */
-    .privacy-toc {
-      flex-shrink: 0;
-      width: 190px;
-      position: sticky;
-      top: 80px;
-    }
-
-    .toc-label {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--text-3);
-      margin-bottom: 12px;
-    }
-
-    .toc-list { list-style: none; display: flex; flex-direction: column; gap: 2px; }
-
-    .toc-list a {
-      font-size: 12px;
-      color: var(--text-3);
-      text-decoration: none;
-      padding: 5px 10px;
-      border-radius: 5px;
-      display: block;
-      transition: color 0.15s, background 0.15s;
-      border-left: 2px solid transparent;
-    }
-
-    .toc-list a:hover { color: var(--text-2); background: var(--surface-2); border-left-color: var(--border); }
-    .toc-list a.active { color: var(--cyan); background: var(--cyan-glow); border-left-color: var(--cyan); }
-
-    .privacy-content { flex: 1; min-width: 0; }
-
-    .privacy-section {
-      margin-bottom: 48px;
-      scroll-margin-top: 80px;
-    }
-
-    .privacy-section-title {
-      font-family: var(--font-brand);
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 16px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--border-soft);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .privacy-section-num {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      color: var(--cyan);
-      background: var(--cyan-glow);
-      border: 1px solid rgba(56,232,255,0.15);
-      border-radius: 4px;
-      padding: 2px 7px;
-    }
-
-    .privacy-content p {
-      font-size: 14px;
-      color: var(--text-2);
-      line-height: 1.75;
-      margin-bottom: 14px;
-    }
-
-    .privacy-content ul {
-      list-style: none;
-      margin: 0 0 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .privacy-content ul li {
-      font-size: 14px;
-      color: var(--text-2);
-      padding-left: 16px;
-      position: relative;
-      line-height: 1.6;
-    }
-
-    .privacy-content ul li::before {
-      content: '—';
-      position: absolute;
-      left: 0;
-      color: var(--text-3);
-      font-size: 12px;
-    }
-
-    /* Data table */
-    .data-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 16px 0 20px;
-      font-size: 13px;
-    }
-
-    .data-table th {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text-3);
-      text-align: left;
-      padding: 8px 14px;
-      background: var(--surface-2);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .data-table th:first-child { border-radius: 6px 0 0 0; }
-    .data-table th:last-child { border-radius: 0 6px 0 0; }
-
-    .data-table td {
-      padding: 10px 14px;
-      border-bottom: 1px solid var(--border-soft);
-      color: var(--text-2);
-      vertical-align: top;
-    }
-
-    .data-table tr:hover td { background: var(--surface-2); }
-
-    .data-table td:first-child {
-      font-family: var(--font-mono);
-      font-size: 12px;
-      color: var(--cyan);
-      white-space: nowrap;
-    }
-
-    .highlight-box {
-      background: var(--green-dim);
-      border: 1px solid rgba(52,211,153,0.2);
-      border-radius: var(--radius);
-      padding: 14px 18px;
-      margin: 16px 0;
-      font-size: 13px;
-      color: var(--green);
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-    }
-
-    .highlight-box svg { flex-shrink: 0; margin-top: 1px; }
-
-    .privacy-link {
-      color: var(--cyan);
-      text-decoration: none;
-      border-bottom: 1px solid rgba(56,232,255,0.2);
-      transition: border-color 0.15s;
-    }
-
-    .privacy-link:hover { border-bottom-color: var(--cyan); }
-
-    /* ── Footer ── */
-    footer {
-      border-top: 1px solid var(--border-soft);
-      padding: 28px 0;
-      position: relative;
-      z-index: 1;
-    }
-
+    footer { border-top: 1px solid var(--border-soft); padding: 28px 0; position: relative; z-index: 1; }
     .footer-inner {
-      max-width: var(--max-w);
-      margin: 0 auto;
-      padding: 0 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      flex-wrap: wrap;
+      max-width: var(--max-w); margin: 0 auto; padding: 0 24px;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
     }
-
-    .footer-brand {
-      font-family: var(--font-brand);
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text-2);
-    }
-
+    .footer-brand { font-family: var(--font-brand); font-size: 14px; font-weight: 700; color: var(--text-2); }
     .footer-brand span { color: var(--cyan); }
-
-    .footer-links {
-      display: flex;
-      gap: 20px;
-    }
-
-    .footer-links a {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      letter-spacing: 0.05em;
-      color: var(--text-3);
-      text-decoration: none;
-      transition: color 0.15s;
-      cursor: pointer;
-    }
-
+    .footer-links { display: flex; gap: 20px; }
+    .footer-links a { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.05em; color: var(--text-3); text-decoration: none; transition: color 0.15s; }
     .footer-links a:hover { color: var(--text-2); }
+    .footer-copy { font-size: 12px; color: var(--text-3); }
 
-    .footer-copy {
-      font-size: 12px;
-      color: var(--text-3);
-    }
-
-    /* ── Animations ── */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .animate-in {
-      animation: fadeUp 0.5s ease both;
-    }
-
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-in { animation: fadeUp 0.5s ease both; }
     .delay-1 { animation-delay: 0.08s; }
     .delay-2 { animation-delay: 0.16s; }
     .delay-3 { animation-delay: 0.24s; }
-    .delay-4 { animation-delay: 0.32s; }
 
-    /* ── Responsive ── */
     @media (max-width: 680px) {
-      .privacy-body { flex-direction: column; }
-      .privacy-toc { display: none; }
       .nav-links .nav-link:not(.active) { display: none; }
     }
   </style>
 </head>
 <body>
-
   <div class="glow-blob glow-blob-1"></div>
   <div class="glow-blob glow-blob-2"></div>
 
-  <!-- ── Nav ── -->
   <nav>
     <div class="nav-inner">
-      <a class="nav-brand" href="#" onclick="showPage('support')">
+      <a class="nav-brand" href="index.html">
         <div class="nav-logo">
-          <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
             <rect x="1" y="3" width="14" height="2" rx="1" fill="currentColor" opacity="0.4"/>
             <rect x="1" y="7" width="9" height="2" rx="1" fill="currentColor" opacity="0.7"/>
             <rect x="1" y="11" width="11" height="2" rx="1" fill="currentColor"/>
@@ -731,386 +215,163 @@
         <span class="nav-name">TabLX</span>
       </a>
       <div class="nav-links">
-        <a class="nav-link active" id="nav-support" onclick="showPage('support')" href="#">Support</a>
-        <a class="nav-link" id="nav-privacy" onclick="showPage('privacy')" href="#">Privacy Policy</a>
+        <a class="nav-link active" href="index.html">Support</a>
+        <a class="nav-link" href="privacy.html">Privacy Policy</a>
       </div>
     </div>
   </nav>
 
-  <!-- ══════════════════════════════════════
-       SUPPORT PAGE
-  ══════════════════════════════════════ -->
-  <div id="page-support" class="page visible">
-
-    <!-- Hero -->
-    <div class="hero">
-      <div class="container">
-        <div class="hero-eyebrow animate-in">TabLX Support</div>
-        <h1 class="hero-title animate-in delay-1">
-          Your tab workspace,<br/><span class="accent">always intact.</span>
-        </h1>
-        <p class="hero-sub animate-in delay-2">
-          Save named tab sessions, restore with one click, and never lose your research context again. Built for Edge and Chrome.
-        </p>
-        <div class="hero-badges animate-in delay-3">
-          <span class="badge cyan">Manifest V3</span>
-          <span class="badge violet">Free + Pro</span>
-          <span class="badge green">No account needed</span>
-          <span class="badge">Edge &amp; Chrome</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Features -->
-    <div class="section">
-      <div class="container">
-        <div class="section-label">What's included</div>
-        <h2 class="section-title">Everything TabLX does</h2>
-        <div class="features-grid">
-          <div class="feature-card">
-            <div class="feature-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-                <polyline points="17 21 17 13 7 13 7 21"/>
-                <polyline points="7 3 7 8 15 8"/>
-              </svg>
-            </div>
-            <div class="feature-name">Save Sessions</div>
-            <div class="feature-desc">Name and save your current tab group as a session. All URLs and group colours are preserved exactly.</div>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="1 4 1 10 7 10"/>
-                <path d="M3.51 15a9 9 0 1 0 .49-3.99"/>
-              </svg>
-            </div>
-            <div class="feature-name">One-Click Restore</div>
-            <div class="feature-desc">Reopen any saved session in a new window with all tabs and groups intact, exactly as you left them.</div>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <polyline points="14 2 14 8 20 8"/>
-                <line x1="16" y1="13" x2="8" y2="13"/>
-                <line x1="16" y1="17" x2="8" y2="17"/>
-              </svg>
-            </div>
-            <div class="feature-name">Export to Markdown</div>
-            <div class="feature-desc">Export sessions as Markdown, ready to paste into Notion, Obsidian, or any notes app. <span style="color:var(--cyan);font-size:12px;">Pro</span></div>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon" style="background:var(--violet-dim);border-color:rgba(167,139,250,0.2);color:var(--violet);">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/>
-                <polyline points="12 6 12 12 16 14"/>
-              </svg>
-            </div>
-            <div class="feature-name">Scheduled Restore <span style="color:var(--violet);font-size:11px;font-family:var(--font-mono);">PRO</span></div>
-            <div class="feature-desc">Set sessions to automatically open at a specific time daily, or just once — your morning workflow, automated.</div>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
-                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
-              </svg>
-            </div>
-            <div class="feature-name">Smart Auto-Tagging</div>
-            <div class="feature-desc">Sessions are automatically labelled by domain patterns — Dev, Research, Work, Finance and more, detected instantly.</div>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-              </svg>
-            </div>
-            <div class="feature-name">Works Offline</div>
-            <div class="feature-desc">All session data is stored locally on your device. No internet required to save, browse, or restore sessions.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- FAQ -->
-    <div class="section">
-      <div class="container">
-        <div class="section-label">Help</div>
-        <h2 class="section-title">Frequently asked questions</h2>
-        <div class="faq-list">
-
-          <div class="faq-item">
-            <button class="faq-q" onclick="toggleFaq(this)">
-              How do I activate my Pro license key?
-              <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="faq-a">
-              Open the TabLX popup, go to <strong>Settings</strong> (gear icon in the top-right), and paste your Whop license key into the License Key field. Click <strong>Activate</strong>. TabLX will validate it against the Whop API and upgrade your account to Pro instantly. Your key is cached locally for 24 hours so it works offline too.
-            </div>
-          </div>
-
-          <div class="faq-item">
-            <button class="faq-q" onclick="toggleFaq(this)">
-              I bought Pro but the extension still shows Free. What do I do?
-              <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="faq-a">
-              First, make sure you entered the license key in the Settings screen inside the extension popup — not your Whop account password or email. The key is a string beginning with <code style="font-family:var(--font-mono);color:var(--cyan);font-size:12px;">license_</code>. If you can't locate it, log in to your Whop account and find it under your purchases. If the problem persists, contact us via the button below.
-            </div>
-          </div>
-
-          <div class="faq-item">
-            <button class="faq-q" onclick="toggleFaq(this)">
-              Will my sessions survive a browser update or reinstall?
-              <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="faq-a">
-              Sessions survive browser updates automatically. If you reinstall the extension or move to a new device, use the <strong>Export</strong> feature (Pro) to save a JSON backup file first, then import it on the new installation. The free tier saves up to 3 sessions locally without any backup option.
-            </div>
-          </div>
-
-          <div class="faq-item">
-            <button class="faq-q" onclick="toggleFaq(this)">
-              Does TabLX work in Edge's sidebar?
-              <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="faq-a">
-              TabLX is currently designed as a toolbar popup extension. Full sidebar support is on our roadmap. In the meantime you can pin the extension to your Edge toolbar for quick one-click access.
-            </div>
-          </div>
-
-          <div class="faq-item">
-            <button class="faq-q" onclick="toggleFaq(this)">
-              Why does TabLX need access to <code style="font-family:var(--font-mono);font-size:12px;">api.whop.com</code>?
-              <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="faq-a">
-              This permission is used exclusively to validate your Pro license key. When you enter a key, one request is made to Whop's API to confirm it's active. The result is cached for 24 hours so the check only happens once per day. No browsing data or session content is ever sent to Whop.
-            </div>
-          </div>
-
-          <div class="faq-item">
-            <button class="faq-q" onclick="toggleFaq(this)">
-              Can I use TabLX on both Edge and Chrome?
-              <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="faq-a">
-              Yes. TabLX is built on Manifest V3 and is fully compatible with both Microsoft Edge and Google Chrome. A single Pro license key works on both browsers. Sessions are stored per-browser locally — they don't sync across browsers automatically.
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </div>
-
-    <!-- Contact -->
-    <div class="section">
-      <div class="container">
-        <div class="contact-card animate-in">
-          <div class="contact-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-              <polyline points="22,6 12,13 2,6"/>
-            </svg>
-          </div>
-          <div class="contact-title">Still need help?</div>
-          <p class="contact-body">
-            Send us a message and we'll get back to you as soon as possible. For license issues, include your Whop order email.
-          </p>
-          <a class="btn btn-primary" href="mailto:your-support-email@domain.com">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-            Contact Support
-          </a>
-        </div>
-      </div>
-    </div>
-
-  </div><!-- /page-support -->
-
-
-  <!-- ══════════════════════════════════════
-       PRIVACY PAGE
-  ══════════════════════════════════════ -->
-  <div id="page-privacy" class="page">
-
-    <div class="privacy-hero">
-      <div class="container">
-        <div class="hero-eyebrow">Legal</div>
-        <h1 class="privacy-hero-title">Privacy Policy</h1>
-        <div class="privacy-meta">Last updated: March 2026 &nbsp;·&nbsp; TabLX Browser Extension</div>
-      </div>
-    </div>
-
+  <div class="hero">
     <div class="container">
-      <div class="privacy-body">
-
-        <!-- ToC -->
-        <aside class="privacy-toc">
-          <div class="toc-label">Contents</div>
-          <ul class="toc-list">
-            <li><a href="#p1" class="toc-anchor">1. Data We Collect</a></li>
-            <li><a href="#p2" class="toc-anchor">2. What We Don't Collect</a></li>
-            <li><a href="#p3" class="toc-anchor">3. How Data Is Used</a></li>
-            <li><a href="#p4" class="toc-anchor">4. Data Retention</a></li>
-            <li><a href="#p5" class="toc-anchor">5. Third-Party Services</a></li>
-            <li><a href="#p6" class="toc-anchor">6. Children's Privacy</a></li>
-            <li><a href="#p7" class="toc-anchor">7. Policy Changes</a></li>
-            <li><a href="#p8" class="toc-anchor">8. Contact</a></li>
-          </ul>
-        </aside>
-
-        <!-- Content -->
-        <div class="privacy-content">
-
-          <div class="privacy-section" id="p1">
-            <h2 class="privacy-section-title"><span class="privacy-section-num">01</span> Data We Collect</h2>
-            <p>TabLX stores the following data exclusively in your browser's local storage (<code style="font-family:var(--font-mono);color:var(--cyan);font-size:12px;">chrome.storage.local</code>), which is sandboxed to the extension and never leaves your device unless explicitly described below:</p>
-            <table class="data-table">
-              <thead>
-                <tr><th>Data</th><th>Where it's stored</th><th>Purpose</th></tr>
-              </thead>
-              <tbody>
-                <tr><td>Tab sessions</td><td>Local device only</td><td>Saving and restoring your workspaces</td></tr>
-                <tr><td>Session notes &amp; tags</td><td>Local device only</td><td>Labels and annotations you add</td></tr>
-                <tr><td>User preferences</td><td>Local device only</td><td>Display and behaviour settings</td></tr>
-                <tr><td>License key</td><td>Local device only</td><td>Activating Pro features</td></tr>
-                <tr><td>License status cache</td><td>Local device only</td><td>Avoiding repeated API calls (24h TTL)</td></tr>
-              </tbody>
-            </table>
-            <p>The extension makes limited outbound requests to two external services:</p>
-            <table class="data-table">
-              <thead>
-                <tr><th>Service</th><th>Data Sent</th><th>Purpose</th></tr>
-              </thead>
-              <tbody>
-                <tr><td>api.whop.com</td><td>Your license key</td><td>Pro license validation</td></tr>
-                <tr><td>google.com/s2/favicons</td><td>Tab domain only</td><td>Displaying tab favicons in the UI</td></tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="privacy-section" id="p2">
-            <h2 class="privacy-section-title"><span class="privacy-section-num">02</span> What We Don't Collect</h2>
-            <div class="highlight-box">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-              <span>TabLX has no backend server of its own. No data is ever transmitted to us.</span>
-            </div>
-            <ul>
-              <li>We do not collect your name, email address, or any personally identifiable information</li>
-              <li>We do not track your browsing history beyond what you explicitly save as a session</li>
-              <li>We do not use analytics, telemetry, or crash-reporting tools</li>
-              <li>We do not use cookies</li>
-              <li>We do not share, sell, or transfer data to any third parties beyond the two services listed in Section 1</li>
-            </ul>
-          </div>
-
-          <div class="privacy-section" id="p3">
-            <h2 class="privacy-section-title"><span class="privacy-section-num">03</span> How Data Is Used</h2>
-            <p>Every piece of data TabLX stores has a single, specific purpose and is never used for anything else:</p>
-            <table class="data-table">
-              <thead>
-                <tr><th>Data</th><th>Use</th></tr>
-              </thead>
-              <tbody>
-                <tr><td>Saved sessions</td><td>Restoring your tab workspaces on demand</td></tr>
-                <tr><td>License key</td><td>Verifying active Pro membership with Whop — once per 24 hours</td></tr>
-                <tr><td>License cache</td><td>Preventing redundant API calls and ensuring offline access</td></tr>
-                <tr><td>Tab domain (favicon)</td><td>Displaying the correct icon for each saved tab in the UI</td></tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="privacy-section" id="p4">
-            <h2 class="privacy-section-title"><span class="privacy-section-num">04</span> Data Retention</h2>
-            <p>All data is stored locally on your device and persists until one of the following occurs:</p>
-            <ul>
-              <li>You manually delete a session within the extension</li>
-              <li>You click "Remove License" in the extension settings</li>
-              <li>You uninstall the extension — the browser automatically clears all local storage</li>
-            </ul>
-            <p>We have no access to your locally stored data and cannot retrieve, modify, or delete it on your behalf.</p>
-          </div>
-
-          <div class="privacy-section" id="p5">
-            <h2 class="privacy-section-title"><span class="privacy-section-num">05</span> Third-Party Services</h2>
-            <p>The two external services TabLX contacts are governed by their own privacy policies:</p>
-            <ul>
-              <li><strong>Whop</strong> — <a class="privacy-link" href="https://whop.com/privacy" target="_blank" rel="noopener">whop.com/privacy</a> — governs how Whop processes your license key during validation</li>
-              <li><strong>Google</strong> — <a class="privacy-link" href="https://policies.google.com/privacy" target="_blank" rel="noopener">policies.google.com/privacy</a> — governs Google's favicon service</li>
-            </ul>
-          </div>
-
-          <div class="privacy-section" id="p6">
-            <h2 class="privacy-section-title"><span class="privacy-section-num">06</span> Children's Privacy</h2>
-            <p>TabLX is not directed at children under the age of 13. We do not knowingly collect any information from children. If you believe a child has provided information through the extension, please contact us so we can address it.</p>
-          </div>
-
-          <div class="privacy-section" id="p7">
-            <h2 class="privacy-section-title"><span class="privacy-section-num">07</span> Changes to This Policy</h2>
-            <p>If this policy changes materially, the updated version will be published at this URL and the "Last updated" date at the top of this page will be revised. Continued use of TabLX after changes are posted constitutes your acceptance of the updated policy.</p>
-          </div>
-
-          <div class="privacy-section" id="p8">
-            <h2 class="privacy-section-title"><span class="privacy-section-num">08</span> Contact</h2>
-            <p>If you have questions about this privacy policy or how TabLX handles data, contact us at:</p>
-            <a class="btn btn-ghost" href="mailto:your-support-email@domain.com" style="margin-top:4px;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-              your-support-email@domain.com
-            </a>
-          </div>
-
-        </div><!-- /privacy-content -->
-      </div><!-- /privacy-body -->
+      <div class="hero-eyebrow animate-in">TabLX Support</div>
+      <h1 class="hero-title animate-in delay-1">Your tab workspace,<br/><span class="accent">always intact.</span></h1>
+      <p class="hero-sub animate-in delay-2">Save named tab sessions, restore with one click, and never lose your research context again. Built for Edge and Chrome.</p>
+      <div class="hero-badges animate-in delay-3">
+        <span class="badge cyan">Manifest V3</span>
+        <span class="badge violet">Free + Pro</span>
+        <span class="badge green">No account needed</span>
+        <span class="badge">Edge &amp; Chrome</span>
+      </div>
     </div>
+  </div>
 
-  </div><!-- /page-privacy -->
+  <div class="section">
+    <div class="container">
+      <div class="section-label">What's included</div>
+      <h2 class="section-title">Everything TabLX does</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          </div>
+          <div class="feature-name">Save Sessions</div>
+          <div class="feature-desc">Name and save your current tab group as a session. All URLs and group colours are preserved exactly.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.99"/></svg>
+          </div>
+          <div class="feature-name">One-Click Restore</div>
+          <div class="feature-desc">Reopen any saved session in a new window with all tabs and groups intact, exactly as you left them.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </div>
+          <div class="feature-name">Export to Markdown</div>
+          <div class="feature-desc">Export sessions as Markdown, ready to paste into Notion, Obsidian, or any notes app. <span style="color:var(--cyan);font-size:12px;">Pro</span></div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon" style="background:var(--violet-dim);border-color:rgba(167,139,250,0.2);color:var(--violet);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="feature-name">Scheduled Restore <span style="color:var(--violet);font-size:11px;font-family:var(--font-mono);">PRO</span></div>
+          <div class="feature-desc">Set sessions to automatically open at a specific time daily, or just once — your morning workflow, automated.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          </div>
+          <div class="feature-name">Smart Auto-Tagging</div>
+          <div class="feature-desc">Sessions are automatically labelled by domain patterns — Dev, Research, Work, Finance and more, detected instantly.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div class="feature-name">Works Offline</div>
+          <div class="feature-desc">All session data is stored locally on your device. No internet required to save, browse, or restore sessions.</div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-  <!-- ── Footer ── -->
+  <div class="section">
+    <div class="container">
+      <div class="section-label">Help</div>
+      <h2 class="section-title">Frequently asked questions</h2>
+      <div class="faq-list">
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            How do I activate my Pro license key?
+            <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-a">Open the TabLX popup, go to <strong>Settings</strong> (gear icon in the top-right), and paste your Whop license key into the License Key field. Click <strong>Activate</strong>. TabLX will validate it and upgrade your account to Pro instantly. Your key is cached locally for 24 hours so it works offline too.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            I bought Pro but the extension still shows Free. What do I do?
+            <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-a">Make sure you entered the license key in the Settings screen inside the extension popup — not your Whop account password or email. The key is a string beginning with <code style="font-family:var(--font-mono);color:var(--cyan);font-size:12px;">license_</code>. If you can't locate it, log in to your Whop account and find it under your purchases. If the problem persists, contact us via the button below.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            Will my sessions survive a browser update or reinstall?
+            <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-a">Sessions survive browser updates automatically. If you reinstall or move to a new device, use the <strong>Export</strong> feature (Pro) to save a JSON backup first, then import it on the new installation. The free tier saves up to 3 sessions locally without any backup option.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            Does TabLX work in Edge's sidebar?
+            <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-a">TabLX is currently designed as a toolbar popup extension. Full sidebar support is on our roadmap. In the meantime you can pin the extension to your Edge toolbar for quick one-click access.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            Why does TabLX need access to <code style="font-family:var(--font-mono);font-size:12px;">api.whop.com</code>?
+            <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-a">This permission is used exclusively to validate your Pro license key. One request is made to Whop's API when you enter a key, and the result is cached for 24 hours. No browsing data or session content is ever sent to Whop.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            Can I use TabLX on both Edge and Chrome?
+            <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-a">Yes. TabLX is built on Manifest V3 and is fully compatible with both Microsoft Edge and Google Chrome. A single Pro license key works on both browsers. Sessions are stored per-browser locally — they don't sync across browsers automatically.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="container">
+      <div class="contact-card">
+        <div class="contact-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </div>
+        <div class="contact-title">Still need help?</div>
+        <p class="contact-body">Send us a message and we'll get back to you as soon as possible. For license issues, include your Whop order email.</p>
+        <a class="btn btn-primary" href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#99;&#97;&#110;&#116;&#114;&#101;&#108;&#108;&#50;&#50;&#64;&#104;&#111;&#116;&#109;&#97;&#105;&#108;&#46;&#99;&#111;&#109;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          Contact Support
+        </a>
+      </div>
+    </div>
+  </div>
+
   <footer>
     <div class="footer-inner">
       <div class="footer-brand">Tab<span>LX</span></div>
       <div class="footer-links">
-        <a onclick="showPage('support')">Support</a>
-        <a onclick="showPage('privacy')">Privacy Policy</a>
-        <a href="mailto:your-support-email@domain.com">Contact</a>
+        <a href="index.html">Support</a>
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#99;&#97;&#110;&#116;&#114;&#101;&#108;&#108;&#50;&#50;&#64;&#104;&#111;&#116;&#109;&#97;&#105;&#108;&#46;&#99;&#111;&#109;">Contact</a>
       </div>
       <div class="footer-copy">© 2026 TabLX</div>
     </div>
   </footer>
 
   <script>
-    function showPage(id) {
-      document.querySelectorAll('.page').forEach(p => p.classList.remove('visible'));
-      document.getElementById('page-' + id).classList.add('visible');
-      document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-      document.getElementById('nav-' + id).classList.add('active');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
     function toggleFaq(btn) {
       const item = btn.closest('.faq-item');
       const isOpen = item.classList.contains('open');
       document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
       if (!isOpen) item.classList.add('open');
     }
-
-    // ToC active state on scroll
-    const tocAnchors = document.querySelectorAll('.toc-anchor');
-    const sections = document.querySelectorAll('.privacy-section');
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          tocAnchors.forEach(a => a.classList.remove('active'));
-          const active = document.querySelector(`.toc-anchor[href="#${entry.target.id}"]`);
-          if (active) active.classList.add('active');
-        }
-      });
-    }, { rootMargin: '-30% 0px -60% 0px' });
-
-    sections.forEach(s => observer.observe(s));
   </script>
-
 </body>
 </html>
